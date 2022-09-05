@@ -90,20 +90,19 @@
       <p class="post-meta">
         <span class="post-description">And why it may make your life easier</span>
       </p>
-      <p>TL;DR: It is an argument of an <strong>automatic function injection</strong></p>
+      <p>TL;DR: It is an argument of an <b>automatic function injection</b></p>
       <!--more-->
-
       <p>First of all, a normal function call looks like this:</p>
-      <pre><code class="hljs language-kotlin"><span class="hljs-keyword">var</span> list = [<span class="hljs-number">1</span>,<span class="hljs-number">2</span>]
+      <pre><code class="language-kotlin"><span class="hljs-keyword">var</span> list = [<span class="hljs-number">1</span>,<span class="hljs-number">2</span>]
 ---
 map(list, (item, index) -&gt; (item * <span class="hljs-number">10</span> + index))
 </code></pre>
-      <p>That&#39;s not handy to chain different function calls. We came up with infix function calls, that means we can move the <code>map</code> to the middle of the parameters and remove the parentheses. It looks like this now:</p>
-      <pre><code class="hljs language-kotlin">[<span class="hljs-number">1</span>,<span class="hljs-number">2</span>] map (item, index) -&gt; (item * <span class="hljs-number">10</span> + index)
+      <p>That's not handy to chain different function calls. We came up with infix function calls, that means we can move the <code>map</code> to the middle of the parameters and remove the parentheses. It looks like this now:</p>
+      <pre><code class="language-kotlin">[<span class="hljs-number">1</span>,<span class="hljs-number">2</span>] map (item, index) -&gt; (item * <span class="hljs-number">10</span> + index)
 </code></pre>
-      <p>And the function <code>map</code> expects to receive a function in the right hand side. DataWeave automatically injects a function if you don&#39;t write a literal one. The injected function will register arguments <code>$</code> and <code>$$</code> in this case, those corresponds to <code>item = $</code> and <code>index = $$</code>. </p>
+      <p>And the function <code>map</code> expects to receive a function in the right hand side. DataWeave automatically injects a function if you don't write a literal one. The injected function will register arguments <code>$</code> and <code>$$</code> in this case, those corresponds to <code>item = $</code> and <code>index = $$</code>.</p>
       <p>So...</p>
-      <pre><code class="hljs language-kotlin">map([<span class="hljs-number">1</span>,<span class="hljs-number">2</span>], (item, index) -&gt; (item * <span class="hljs-number">10</span> + index))
+      <pre><code class="language-kotlin">map([<span class="hljs-number">1</span>,<span class="hljs-number">2</span>], (item, index) -&gt; (item * <span class="hljs-number">10</span> + index))
 
 <span class="hljs-comment">// Is exactly the same as (infix notation)</span>
 

@@ -8,7 +8,7 @@ import Handlebars from "handlebars";
 import b from "js-beautify";
 import sass from "sass";
 
-import "./functions.mjs";
+import { init as initHandlebars } from "./functions.mjs";
 
 type Page = {
   publicUrl: string;
@@ -174,6 +174,8 @@ async function main() {
   if (!args["--outDir"]) throw new Error("--outDir must be provided");
   if (!args["--publicUrl"]) throw new Error("--publicUrl must be provided");
 
+  await initHandlebars();
+
   const srcDir = resolve(args["--srcDir"]!);
   const outDir = resolve(args["--outDir"]!);
   const publicUrl = args["--publicUrl"]!;
@@ -196,7 +198,10 @@ async function main() {
   };
 
   // load templates
-  for await (const file of iterateFolder(resolve(srcDir, "./_layouts"), false)) {
+  for await (const file of iterateFolder(
+    resolve(srcDir, "./_layouts"),
+    false
+  )) {
     const content = (await readFile(file)).toString();
     const r = matter(content);
     const matterfront: Page = {
@@ -219,7 +224,10 @@ async function main() {
   }
 
   // load content files
-  for await (const file of iterateFolder(resolve(srcDir, "./_content"), false)) {
+  for await (const file of iterateFolder(
+    resolve(srcDir, "./_content"),
+    false
+  )) {
     console.log(`> Processing input file ${relative(process.cwd(), file)}`);
     await processMatterfront(file, context);
   }

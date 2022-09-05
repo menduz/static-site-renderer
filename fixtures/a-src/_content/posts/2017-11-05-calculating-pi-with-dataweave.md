@@ -49,3 +49,45 @@ fun pi(terms: Number = 1E4): Number = do {
 pi(1E4)
 // Outputs: 3.1415426585893202
 ```
+
+
+$$
+s_j = \sum_{i} w_{ij}.y_{i}
+$$
+
+*where $$y_{i}$$ is all the inputs (bias included)*
+
+After computing its state, the neuron passes it through its activation function ($f_j$), which normalizes the result ($$y_j$$) (normally between 0-1).
+
+$$y_j = f_j(S_j)$$
+
+```x-dot
+# Find examples at https://graphviz.org/gallery/
+digraph G {
+
+	subgraph cluster_0 {
+		style=filled;
+		color=lightgrey;
+		node [style=filled,color=white];
+		a0 -> a1 -> a2 -> a3;
+		label = "process #1";
+	}
+
+	subgraph cluster_1 {
+		node [style=filled];
+		b0 -> b1 -> b2 -> b3;
+		label = "process #2";
+		color=blue
+	}
+	start -> a0;
+	start -> b0;
+	a1 -> b3;
+	b2 -> a3;
+	a3 -> a0;
+	a3 -> end;
+	b3 -> end;
+
+	start [shape=Mdiamond];
+	end [shape=Msquare];
+}
+```
