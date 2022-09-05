@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "moduleResolution": "node",
+    "declaration": true,
+    "module": "ESNext",
+    "outDir": "dist",
+    "types": ["node"],
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["src"]
+}

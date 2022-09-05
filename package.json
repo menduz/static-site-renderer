@@ -1,0 +1,28 @@
+{
+  "name": "static-site-renderer",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "dist/index.mjs",
+  "bin": "dist/index.mjs",
+  "scripts": {
+    "test-a": "",
+    "test": "npm run test-a",
+    "build": "tsc -p tsconfig.json"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/js-beautify": "^1.13.3",
+    "@types/node": "^16.11.56",
+    "gray-matter": "^4.0.3",
+    "handlebars": "^4.7.7",
+    "highlight.js": "^11.6.0",
+    "js-beautify": "^1.14.6",
+    "marked": "^4.0.19",
+    "monaco-editor": "^0.34.0",
+    "sass": "^1.54.5",
+    "ts-node": "^10.9.1"
+  }
+}
