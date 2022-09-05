@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+import arg from "arg";
 import { cp, mkdir, readFile, rm, writeFile } from "fs/promises";
 import matter from "gray-matter";
 import { basename, dirname, join, relative, resolve } from "path";
@@ -161,7 +163,21 @@ function renderWithLayout(
   }
 }
 
-async function main(outDir: string) {
+async function main() {
+  const args = arg({
+    "--outDir": String,
+    "--publicUrl": String,
+    "--srcDir": String,
+  });
+
+  if (!args["--srcDir"]) throw new Error("--srcDir must be provided");
+  if (!args["--outDir"]) throw new Error("--outDir must be provided");
+  if (!args["--publicUrl"]) throw new Error("--publicUrl must be provided");
+
+  const srcDir = resolve(args["--srcDir"]!);
+  const outDir = resolve(args["--outDir"]!);
+  const publicUrl = args["--publicUrl"]!;
+
   // create the out dir
   await mkdir(outDir, { recursive: true });
 
@@ -171,18 +187,16 @@ async function main(outDir: string) {
       await rm(file);
     }
   }
-  const PUBLIC_URL = process.env.PUBLIC_URL;
-  if (!PUBLIC_URL) throw new Error("PUBLIC_URL env var not set");
 
   const context: GlobalContext = {
-    baseUrl: PUBLIC_URL,
+    baseUrl: publicUrl,
     pages: {},
     layouts: {},
     styles: {},
   };
 
   // load templates
-  for await (const file of iterateFolder("../_layouts", false)) {
+  for await (const file of iterateFolder(resolve(srcDir, "./_layouts"), false)) {
     const content = (await readFile(file)).toString();
     const r = matter(content);
     const matterfront: Page = {
@@ -205,13 +219,13 @@ async function main(outDir: string) {
   }
 
   // load content files
-  for await (const file of iterateFolder("../_content", false)) {
+  for await (const file of iterateFolder(resolve(srcDir, "./_content"), false)) {
     console.log(`> Processing input file ${relative(process.cwd(), file)}`);
     await processMatterfront(file, context);
   }
 
   // copy public folder
-  const publicFolder = resolve("../_public");
+  const publicFolder = resolve(resolve(srcDir, "./_public"));
   for await (const file of iterateFolder(publicFolder, false)) {
     const relativePath = relative(publicFolder, file);
     // console.log(`> Copy ${relativePath} to ${resolve(outDir, relativePath)}`);
@@ -268,7 +282,7 @@ function redirectPage(context: GlobalContext, slug: string) {
 </html>`;
 }
 
-main("../out").catch((err) => {
+main().catch((err) => {
   console.error(err);
   process.exitCode = 1;
 });

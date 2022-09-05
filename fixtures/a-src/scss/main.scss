@@ -1,0 +1,51 @@
+:root {
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  --font_m: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  --font_b: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  --mono: "iosevka_mz_regular", "Menlo", "SF Mono", monospace, serif;
+  --mono_b: "iosevka_mz_medium", "Menlo", "SF Mono", monospace, serif;
+  --mono_m: "iosevka_mz_medium", "Menlo", "SF Mono", monospace, serif;
+  --mono_t: "iosevka_mz_thin", "Menlo", "SF Mono", monospace, serif;
+
+  --base03: #002b36;
+  --base02: #073642;
+  --base01: #586e75;
+  --base00: #657b83;
+  --base0: #839496;
+  --base1: #93a1a1;
+  --base2: #ffffff;
+  --base3: #f0f0f0;
+  --yellow: #ffd33d;
+  --orange: #f66a0a;
+  --pink: #ea4aaa;
+  --red: #d73a49;
+  --violet: #6f42c1;
+  --blue: #0366d6;
+  --cyan: #79b8ff;
+  --green: #28a745;
+
+  // light theme
+
+  --background: #ffffff; // base2
+  --background2: #f6f8fa; // base3
+
+  --f_high: #002b36; // base03
+  --f_med: #444d56; // base01
+  --f_low: #6a737d; // base00
+  --f_inv: #90a0a1; // base0
+
+  --code_back: #f8f8fa;
+  --code_high: #005cc5;
+  --code_med: #24292e;
+  --code_low: #d73a49;
+  --code_inv: #6a737d; // comment
+}
+
+
+@import "syntax-highlighting";

@@ -1,0 +1,50 @@
+---
+layout: home
+---
+
+<script src="/js/jquery.min.js"></script>
+<script src="/js/webfont.js"></script>
+<script src="/js/snap.svg-min.js"></script>
+<script src="/js/underscore-min.js"></script>
+<script src="/js/sequence-diagram-min.js"></script>
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"
+  async
+></script>
+
+<section
+  itemscope
+  itemtype="http://schema.org/BlogPosting"
+  itemprop="articleBody"
+>
+  <h1 itemprop="name headline">{{ data.title }}</h1>
+  {{#if data.description}}
+  <p class="post-meta">
+    <span class="post-description">{{ data.description }}</span>
+  </p>
+  {{/if}}
+  {{{ markdown content }}}
+  <footer>
+    {{#if data.author}} By
+    <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <span itemprop="name"
+        ><a href="https://twitter.com/{{ data.author }}"
+          >{{ data.author }}</a
+        ></span
+      >
+    </span>
+    {{/if}} {{#if data.date}} On
+    <time datetime="{{ isoDate data.date }}" itemprop="datePublished"
+      >{{ prettyDate data.date }}</time
+    >
+    {{/if}}
+  </footer>
+</section>
+
+<script>
+  $("pre[diagram]").sequenceDiagram({
+    theme: "snapHand",
+    "font-family":
+      '-apple-system,BlinkMacSystemFont,"Segoe UI","Roboto","Oxygen","Ubuntu","Cantarell","Fira Sans","Droid Sans","Helvetica Neue",sans-serif',
+  });
+</script>

@@ -1,0 +1,18 @@
+---
+layout: home
+title: menduz
+slug: /
+---
+
+<section class="post-list">
+  {{#each (sortAsc context.pages "date") as |post| }} {{#if post.date }}
+  <a href="{{ post.slug }}" class="post-item" title="{{ post.title }}">
+    <div class="article-title">
+      <span>{{ post.title }}</span>
+      <time datetime="{{ isoDate post.date }}">{{ prettyDate post.date }}</time>
+    </div>
+
+    {{{ markdown post.excerpt }}}
+  </a>
+  {{/if}} {{/each}}
+</section>
