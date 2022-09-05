@@ -21,6 +21,7 @@ type Page = {
 
 type GlobalContext = {
   baseUrl: string;
+  srcDir: string;
   pages: Record<string, Page>;
   layouts: Record<
     string,
@@ -70,7 +71,9 @@ async function processMatterfront(file: string, globalContext: GlobalContext) {
       globalContext.pages[slug] = matterfront;
     }
   } else {
-    console.warn(`! Missing slug in file ${relative(process.cwd(), file)}`);
+    console.warn(
+      `! Missing slug in file ${relative(globalContext.srcDir, file)}`
+    );
   }
 }
 
@@ -111,7 +114,7 @@ async function renderPage(context: GlobalContext, ret: Page, outDir: string) {
     for (const outPath of paths) {
       await mkdir(dirname(outPath), { recursive: true });
       await writeFile(outPath, content);
-      console.log(`  Writing ${relative(process.cwd(), outPath)}`);
+      console.log(`  Writing ${relative(context.srcDir, outPath)}`);
     }
   }
 }
@@ -192,6 +195,7 @@ async function main() {
 
   const context: GlobalContext = {
     baseUrl: publicUrl,
+    srcDir,
     pages: {},
     layouts: {},
     styles: {},
@@ -199,7 +203,7 @@ async function main() {
 
   // load templates
   for await (const file of iterateFolder(
-    resolve(srcDir, "./_layouts"),
+    resolve(srcDir, ".site-generator/layouts"),
     false
   )) {
     const content = (await readFile(file)).toString();
@@ -211,9 +215,7 @@ async function main() {
       orig: content,
     };
     const name = basename(file).replace(/\..+$/, "");
-    console.log(
-      `> Loading template ${name} from ${relative(process.cwd(), file)}`
-    );
+    console.log(`> Loading template ${name} from ${relative(srcDir, file)}`);
     context.layouts[name] = {
       matter: matterfront,
       template: Handlebars.compile(matterfront.content),
@@ -223,17 +225,21 @@ async function main() {
     });
   }
 
+  const outRelative = relative(srcDir, outDir);
   // load content files
-  for await (const file of iterateFolder(
-    resolve(srcDir, "./_content"),
-    false
-  )) {
-    console.log(`> Processing input file ${relative(process.cwd(), file)}`);
+  for await (const file of iterateFolder(resolve(srcDir, "."), false)) {
+    const relativeFile = relative(srcDir, file);
+    if (
+      relativeFile.startsWith(".") ||
+      relativeFile.startsWith(outRelative)
+    )
+      continue;
+    console.log(`> Processing input file ${relativeFile}`);
     await processMatterfront(file, context);
   }
 
   // copy public folder
-  const publicFolder = resolve(resolve(srcDir, "./_public"));
+  const publicFolder = resolve(resolve(srcDir, ".site-generator/public"));
   for await (const file of iterateFolder(publicFolder, false)) {
     const relativePath = relative(publicFolder, file);
     // console.log(`> Copy ${relativePath} to ${resolve(outDir, relativePath)}`);
