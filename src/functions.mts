@@ -23,6 +23,30 @@ export async function init() {
   Handlebars.registerHelper("json", function (arg) {
     const j = JSON.stringify(arg, null, 2);
     console.log(j);
+    return j
+  });
+
+  Handlebars.registerHelper("eq", function (a, b) {
+    return a == b
+  });
+
+  Handlebars.registerHelper("neq", function (a, b) {
+    return a != b
+  });
+  Handlebars.registerHelper("gt", function (a, b) {
+    return a > b
+  });
+  Handlebars.registerHelper("lt", function (a, b) {
+    return a < b
+  });
+  Handlebars.registerHelper("gte", function (a, b) {
+    return a >= b
+  });
+  Handlebars.registerHelper("lte", function (a, b) {
+    return a <= b
+  });
+  Handlebars.registerHelper("number", function (a) {
+    return +a
   });
 
   Handlebars.registerHelper(
@@ -91,6 +115,21 @@ export async function init() {
   });
 
   Handlebars.registerHelper("sortAsc", function (iterable, field) {
+    if (field) {
+      const iter: any[] = Array.isArray(iterable)
+        ? iterable
+        : iterable && typeof iterable == "object"
+        ? Object.values(iterable)
+        : [];
+
+      return iter.sort((a, b) => {
+        return a[field] < b[field] ? -1 : 1;
+      });
+    }
+    throw new Error("Iteration failed. second argument field not");
+  });
+
+  Handlebars.registerHelper("sortDesc", function (iterable, field) {
     if (field) {
       const iter: any[] = Array.isArray(iterable)
         ? iterable

@@ -5,7 +5,7 @@ slug: /
 ---
 
 <section class="post-list">
-  {{#each (sortAsc context.pages "date") as |post| }} {{#if post.date }}
+  {{#each (sortDesc context.pages "date") as |post| }} {{#if post.date }}
   <a href="{{ post.slug }}" class="post-item" title="{{ post.title }}">
     <div class="article-title">
       <span>{{ post.title }}</span>
