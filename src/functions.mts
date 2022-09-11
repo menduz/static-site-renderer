@@ -1,7 +1,8 @@
 import Handlebars from "handlebars";
 import { parse as parseMarkdown, ParseFlags } from "markdown-wasm";
 import hljs from "highlight.js";
-import { graphvizSync } from "@hpcc-js/wasm";
+import hpccWasm from '@hpcc-js/wasm';
+const { graphvizSync } = hpccWasm;
 
 export async function init() {
   const viz = await graphvizSync();
