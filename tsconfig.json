@@ -3,9 +3,10 @@
     "target": "es2020",
     "moduleResolution": "node",
     "declaration": true,
-    "module": "ESNext",
+    "module": "CommonJS",
     "outDir": "dist",
     "types": ["node"],
+    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true
   },
   "include": ["src"]

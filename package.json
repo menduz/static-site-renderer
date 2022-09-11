@@ -2,13 +2,12 @@
   "name": "static-site-renderer",
   "version": "1.0.0",
   "description": "",
-  "type": "module",
   "main": "dist/index.mjs",
   "bin": "dist/index.mjs",
   "scripts": {
-    "test-a": "./dist/index.mjs --outDir fixtures/a-out --publicUrl https://menduz.com --srcDir fixtures/a-src",
+    "test-a": "./dist/index.js --outDir fixtures/a-out --publicUrl https://menduz.com --srcDir fixtures/a-src",
     "test": "npm run test-a",
-    "build": "tsc -p tsconfig.json && chmod +x dist/index.mjs"
+    "build": "tsc -p tsconfig.json && chmod +x dist/index.js"
   },
   "keywords": [],
   "author": "menduz",

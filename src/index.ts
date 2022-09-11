@@ -3,12 +3,12 @@ import arg from "arg";
 import { cp, mkdir, readFile, rm, writeFile } from "fs/promises";
 import matter from "gray-matter";
 import { basename, dirname, join, relative, resolve } from "path";
-import { iterateFolder } from "./filesystem.mjs";
+import { iterateFolder } from "./filesystem.js";
 import Handlebars from "handlebars";
 import b from "js-beautify";
 import sass from "sass";
 
-import { init as initHandlebars } from "./functions.mjs";
+import { init as initHandlebars } from "./functions.js";
 
 type Page = {
   publicUrl: string;

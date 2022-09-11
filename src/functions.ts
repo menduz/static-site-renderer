@@ -1,8 +1,7 @@
 import Handlebars from "handlebars";
 import { parse as parseMarkdown, ParseFlags } from "markdown-wasm";
 import hljs from "highlight.js";
-import hpccWasm from '@hpcc-js/wasm';
-const { graphvizSync } = hpccWasm;
+import { graphvizSync } from "@hpcc-js/wasm";
 
 export async function init() {
   const viz = await graphvizSync();
@@ -10,44 +9,47 @@ export async function init() {
   Handlebars.registerHelper("markdown", (content: string) => {
     return parseMarkdown(content, {
       onCodeBlock(lang, codeBytes) {
-        const code = codeBytes.toString()
+        const code = codeBytes.toString();
         if (lang == "x-dot") {
           return viz.dot(code, "svg");
         }
         const language = hljs.getLanguage(lang) ? lang : "plaintext";
         return hljs.highlight(code, { language }).value;
       },
-      parseFlags: ParseFlags.DEFAULT | ParseFlags.LATEX_MATH_SPANS | ParseFlags.COLLAPSE_WHITESPACE
+      parseFlags:
+        ParseFlags.DEFAULT |
+        ParseFlags.LATEX_MATH_SPANS |
+        ParseFlags.COLLAPSE_WHITESPACE,
     });
   });
 
   Handlebars.registerHelper("json", function (arg) {
     const j = JSON.stringify(arg, null, 2);
     console.log(j);
-    return j
+    return j;
   });
 
   Handlebars.registerHelper("eq", function (a, b) {
-    return a == b
+    return a == b;
   });
 
   Handlebars.registerHelper("neq", function (a, b) {
-    return a != b
+    return a != b;
   });
   Handlebars.registerHelper("gt", function (a, b) {
-    return a > b
+    return a > b;
   });
   Handlebars.registerHelper("lt", function (a, b) {
-    return a < b
+    return a < b;
   });
   Handlebars.registerHelper("gte", function (a, b) {
-    return a >= b
+    return a >= b;
   });
   Handlebars.registerHelper("lte", function (a, b) {
-    return a <= b
+    return a <= b;
   });
   Handlebars.registerHelper("number", function (a) {
-    return +a
+    return +a;
   });
 
   Handlebars.registerHelper(
