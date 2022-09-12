@@ -7,6 +7,7 @@ import { iterateFolder } from "./filesystem.js";
 import Handlebars from "handlebars";
 import b from "js-beautify";
 import sass from "sass";
+import hljs from "highlight.js";
 
 import { init as initHandlebars } from "./functions.js";
 
@@ -171,6 +172,7 @@ async function main() {
     "--outDir": String,
     "--publicUrl": String,
     "--srcDir": String,
+    "--require": String
   });
 
   if (!args["--srcDir"]) throw new Error("--srcDir must be provided");
@@ -201,6 +203,14 @@ async function main() {
     styles: {},
   };
 
+  // import a custom script
+  if (args["--require"]) {
+    const imported = require(resolve(args["--require"]));
+    if (imported.default) {
+      await imported.default({ context, Handlebars, hljs });
+    }
+  }
+
   // load templates
   for await (const file of iterateFolder(
     resolve(srcDir, ".site-generator/layouts"),
@@ -229,10 +239,7 @@ async function main() {
   // load content files
   for await (const file of iterateFolder(resolve(srcDir, "."), false)) {
     const relativeFile = relative(srcDir, file);
-    if (
-      relativeFile.startsWith(".") ||
-      relativeFile.startsWith(outRelative)
-    )
+    if (relativeFile.startsWith(".") || relativeFile.startsWith(outRelative))
       continue;
     console.log(`> Processing input file ${relativeFile}`);
     await processMatterfront(file, context);
