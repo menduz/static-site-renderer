@@ -10,6 +10,7 @@ import sass from "sass";
 import hljs from "highlight.js";
 
 import { init as initHandlebars } from "./functions.js";
+import { existsSync } from "fs";
 
 type Page = {
   publicUrl: string;
@@ -172,7 +173,6 @@ async function main() {
     "--outDir": String,
     "--publicUrl": String,
     "--srcDir": String,
-    "--require": String
   });
 
   if (!args["--srcDir"]) throw new Error("--srcDir must be provided");
@@ -203,11 +203,18 @@ async function main() {
     styles: {},
   };
 
+  (context as any).context = context
+
   // import a custom script
-  if (args["--require"]) {
-    const imported = require(resolve(args["--require"]));
+  const script = resolve(srcDir, ".site-generator/index.js")
+  if (existsSync(script)) {
+    console.log(`> Running ${relative(srcDir, script)}`);
+    const imported = require(script);
+    const params = { context, Handlebars, hljs };
     if (imported.default) {
-      await imported.default({ context, Handlebars, hljs });
+      await imported.default(params);
+    } else if (typeof imported == "function") {
+      await imported(params);
     }
   }
 
