@@ -33,6 +33,7 @@ type GlobalContext = {
     }
   >;
   styles: Record<string, Page & { finalUrl: string }>;
+  preProcessPage?: (page: Page) => void;
 };
 
 Handlebars.registerHelper("styleUrl", function (context: GlobalContext, name) {
@@ -51,20 +52,32 @@ async function processMatterfront(file: string, globalContext: GlobalContext) {
     publicUrl: "NONE",
   };
 
+  if (file.endsWith(".css") || file.endsWith(".scss")) {
+    matterfront.content = (
+      await sass.compileStringAsync(matterfront.content, {
+        loadPaths: [dirname(file)],
+      })
+    ).css;
+  }
+
+  if (globalContext.preProcessPage) {
+    globalContext.preProcessPage(matterfront);
+  }
+
   const slug = matterfront.slug as string | undefined;
+
   if (slug) {
-    matterfront.publicUrl = new URL(slug, globalContext.baseUrl).toString();
+    try {
+      matterfront.publicUrl = new URL(slug, globalContext.baseUrl).toString();
+    } catch (err: any) {
+      matterfront.publicUrl = globalContext.baseUrl + slug;
+    }
 
     if ((slug as string) in globalContext.pages) {
       throw new Error("Duplicated slug: " + slug);
     }
 
     if (file.endsWith(".css") || file.endsWith(".scss")) {
-      matterfront.content = (
-        await sass.compileStringAsync(matterfront.content, {
-          loadPaths: [dirname(file)],
-        })
-      ).css;
       globalContext.styles[slug] = {
         ...matterfront,
         finalUrl: slug,
@@ -203,18 +216,19 @@ async function main() {
     styles: {},
   };
 
-  (context as any).context = context
+  (context as any).context = context;
 
   // import a custom script
-  const script = resolve(srcDir, ".site-generator/index.js")
+  const script = resolve(srcDir, ".site-generator/index.js");
+  let imported = null;
+  const paramsForScript = { context, Handlebars, hljs };
   if (existsSync(script)) {
     console.log(`> Running ${relative(srcDir, script)}`);
-    const imported = require(script);
-    const params = { context, Handlebars, hljs };
+    imported = require(script);
     if (imported.default) {
-      await imported.default(params);
+      await imported.default(paramsForScript);
     } else if (typeof imported == "function") {
-      await imported(params);
+      await imported(paramsForScript);
     }
   }
 
@@ -250,6 +264,10 @@ async function main() {
       continue;
     console.log(`> Processing input file ${relativeFile}`);
     await processMatterfront(file, context);
+  }
+
+  if (imported && imported.runChecks) {
+    await imported.runChecks(paramsForScript);
   }
 
   // copy public folder
