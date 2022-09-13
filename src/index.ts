@@ -32,6 +32,10 @@ type GlobalContext = {
       template: Handlebars.TemplateDelegate;
     }
   >;
+  configuration: {
+    staticFolder: string;
+    layoutsFolder: string;
+  };
   styles: Record<string, Page & { finalUrl: string }>;
   preProcessPage?: (page: Page) => void;
 };
@@ -50,7 +54,7 @@ async function processMatterfront(file: string, globalContext: GlobalContext) {
     ...r,
     orig: content,
     publicUrl: "NONE",
-    relativePath: relative(globalContext.srcDir, file)
+    relativePath: relative(globalContext.srcDir, file),
   };
 
   if (file.endsWith(".css") || file.endsWith(".scss")) {
@@ -215,6 +219,10 @@ async function main() {
     pages: {},
     layouts: {},
     styles: {},
+    configuration: {
+      staticFolder: ".site-generator/public",
+      layoutsFolder: ".site-generator/layouts",
+    },
   };
 
   (context as any).context = context;
@@ -235,7 +243,7 @@ async function main() {
 
   // load templates
   for await (const file of iterateFolder(
-    resolve(srcDir, ".site-generator/layouts"),
+    resolve(srcDir, context.configuration.layoutsFolder),
     false
   )) {
     const content = (await readFile(file)).toString();
@@ -245,7 +253,7 @@ async function main() {
       ...r.data,
       ...r,
       orig: content,
-      relativePath: relative(context.srcDir, file)
+      relativePath: relative(context.srcDir, file),
     };
     const name = basename(file).replace(/\..+$/, "");
     console.log(`> Loading template ${name} from ${relative(srcDir, file)}`);
@@ -273,7 +281,9 @@ async function main() {
   }
 
   // copy public folder
-  const publicFolder = resolve(resolve(srcDir, ".site-generator/public"));
+  const publicFolder = resolve(
+    resolve(srcDir, context.configuration.staticFolder)
+  );
   for await (const file of iterateFolder(publicFolder, false)) {
     const relativePath = relative(publicFolder, file);
     // console.log(`> Copy ${relativePath} to ${resolve(outDir, relativePath)}`);
