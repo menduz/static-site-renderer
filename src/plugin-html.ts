@@ -29,12 +29,12 @@ async function renderPage(context: GlobalContext, ret: Page) {
 
     addOutPath(ret.slug);
 
-    if (!ret.data.raw) {
+    if (!ret.matterfront.raw) {
       ret.content = Handlebars.compile(ret.content)({ context, ...ret });
     }
 
     const content = b.html(
-      renderWithLayout(context, ret.data.layout as string | undefined, ret, [
+      renderWithLayout(context, ret.matterfront.layout as string | undefined, ret, [
         ret.slug,
       ]),
       {
@@ -52,10 +52,10 @@ async function renderPage(context: GlobalContext, ret: Page) {
 export function renderWithLayout(
   context: GlobalContext,
   layoutName: string | undefined,
-  data: Page,
+  page: Page,
   stack: string[]
 ): string {
-  const contextForRendering = { context, ...data };
+  const contextForRendering = { context, ...page };
 
   if (layoutName) {
     const layout = context.layouts[layoutName];
@@ -65,10 +65,10 @@ export function renderWithLayout(
     const content = layout.template(contextForRendering);
 
     const newStack = [...stack, layoutName];
-    if (layout.matter.data.layout) {
+    if (layout.matter.matterfront.layout) {
       return renderWithLayout(
         context,
-        layout.matter.data.layout as string | undefined,
+        layout.matter.matterfront.layout as string | undefined,
         { ...contextForRendering, content },
         newStack
       );
@@ -76,7 +76,7 @@ export function renderWithLayout(
 
     return content;
   } else {
-    console.dir(data);
+    console.dir(page);
     throw new Error("asd");
   }
 }

@@ -17,10 +17,10 @@ layout: home
   itemtype="http://schema.org/BlogPosting"
   itemprop="articleBody"
 >
-  <h1 itemprop="name headline">{{ data.title }}</h1>
-  {{#if data.description}}
+  <h1 itemprop="name headline">{{ matterfront.title }}</h1>
+  {{#if matterfront.description}}
   <p class="post-meta">
-    <span class="post-description">{{ data.description }}</span>
+    <span class="post-description">{{ matterfront.description }}</span>
   </p>
   {{/if}}
 
@@ -28,17 +28,17 @@ layout: home
 
   {{{ markdown content }}}
   <footer>
-    {{#if data.author}} By
+    {{#if matterfront.author}} By
     <span itemprop="author" itemscope itemtype="http://schema.org/Person">
       <span itemprop="name"
-        ><a href="https://twitter.com/{{ data.author }}"
-          >{{ data.author }}</a
+        ><a href="https://twitter.com/{{ matterfront.author }}"
+          >{{ matterfront.author }}</a
         ></span
       >
     </span>
-    {{/if}} {{#if data.date}} On
-    <time datetime="{{ isoDate data.date }}" itemprop="datePublished"
-      >{{ prettyDate data.date }}</time
+    {{/if}} {{#if matterfront.date}} On
+    <time datetime="{{ isoDate matterfront.date }}" itemprop="datePublished"
+      >{{ prettyDate matterfront.date }}</time
     >
     {{/if}}
   </footer>

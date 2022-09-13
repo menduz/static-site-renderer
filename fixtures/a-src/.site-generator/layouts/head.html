@@ -4,9 +4,9 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>{{ data.title }}</title>{{log .}}
+  <title>{{ matterfront.title }}</title>{{log .}}
 
-  <meta name="description" content="{{ data.description }}">
+  <meta name="description" content="{{ matterfront.description }}">
   <meta name="keywords" content="{{ join keywords ', ' }}">
 
   <meta name="HandheldFriendly" content="True">
@@ -16,31 +16,31 @@
   <meta property="og:type" content="article">
 
   <meta property="article:section" content="{{ join categories ', ' }}">
-  {{#if data.keywords }}<meta property="article:tag" content="{{ data.keywords }}" />{{/if}}
-  {{#if data.date }}<meta property="article:published_time" content="{{ isoDate data.date }}" />{{/if}}
+  {{#if matterfront.keywords }}<meta property="article:tag" content="{{ matterfront.keywords }}" />{{/if}}
+  {{#if matterfront.date }}<meta property="article:published_time" content="{{ isoDate matterfront.date }}" />{{/if}}
   <meta property="og:type" content="website">
   <meta property="og:url" content="{{ publicUrl }}">
-  <meta property="og:title" content="{{ data.title }}">
-  <meta property="og:image" content="{{ resolveUrl (getOrElse data.cover '/images/mz-cover.png') context.baseUrl }}">
-  <meta property="og:description" content="{{ data.description }}">
-  <meta property="og:site_name" content="{{ data.author }}">
+  <meta property="og:title" content="{{ matterfront.title }}">
+  <meta property="og:image" content="{{ resolveUrl (getOrElse matterfront.cover '/images/mz-cover.png') context.baseUrl }}">
+  <meta property="og:description" content="{{ matterfront.description }}">
+  <meta property="og:site_name" content="{{ matterfront.author }}">
   <meta property="og:locale" content="en-us">
 
   <!-- Social: Twitter -->
   <meta name="twitter:card" content="summary">
   <meta name="twitter:site" content="@menduz">
-  {{#if data.author }}
-  <meta property="article:author" content="{{ data.author }}" />
-  <meta name="twitter:creator" content="{{ data.author }}" />
+  {{#if matterfront.author }}
+  <meta property="article:author" content="{{ matterfront.author }}" />
+  <meta name="twitter:creator" content="{{ matterfront.author }}" />
   {{/if}}
-  <meta name="twitter:title" content="{{ data.title }}">
-  <meta name="twitter:description" content="{{ data.description }}">
-  <meta name="twitter:image:src" content="{{ resolveUrl (getOrElse data.cover '/images/mz-cover.png') context.baseUrl }}">
+  <meta name="twitter:title" content="{{ matterfront.title }}">
+  <meta name="twitter:description" content="{{ matterfront.description }}">
+  <meta name="twitter:image:src" content="{{ resolveUrl (getOrElse matterfront.cover '/images/mz-cover.png') context.baseUrl }}">
 
   <!-- Social: Google+ / Schema.org  -->
-  <meta itemprop="name" content="{{ data.title }}">
-  <meta itemprop="description" content="{{ data.description }}">
-  <meta itemprop="image" content="{{ resolveUrl (getOrElse data.cover '/images/mz-cover.png') context.baseUrl }}">
+  <meta itemprop="name" content="{{ matterfront.title }}">
+  <meta itemprop="description" content="{{ matterfront.description }}">
+  <meta itemprop="image" content="{{ resolveUrl (getOrElse matterfront.cover '/images/mz-cover.png') context.baseUrl }}">
 
   <!-- rel prev and next -->
   <link rel="stylesheet" href="{{ styleUrl context 'main.css' }}" />
@@ -52,7 +52,7 @@
 
   <script type="text/javascript">
     var _gaq = _gaq || [];
-    _gaq.push(['_setAccount', '{{ data.google_analytics }}']);
+    _gaq.push(['_setAccount', '{{ matterfront.google_analytics }}']);
     _gaq.push(['_trackPageview']);
 
     (function () {

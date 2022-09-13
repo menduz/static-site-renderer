@@ -14,22 +14,30 @@ import { GlobalContext, Page } from "./types.js";
 import { scssPlugin } from "./plugin-scss.js";
 import { htmlPlugin, renderWithLayout } from "./plugin-html.js";
 
-// Process a matterfront file
-async function processMatterfront(file: string, context: GlobalContext) {
+async function pageFromFile(file: string, context: GlobalContext) {
   const content = (await readFile(file)).toString();
   const r = matter(content);
   const page: Page = {
     ...r,
+    matterfront: r.data,
     orig: content,
     publicUrl: "NONE",
     relativePath: relative(context.srcDir, file),
   };
 
+  delete (page as any).data;
+
   if (context.preProcessPage) {
     context.preProcessPage(page);
   }
 
-  page.slug = page.slug || (page.data as any)?.slug;
+  return page;
+}
+
+// Process a matterfront file
+async function processMatterfront(file: string, context: GlobalContext) {
+  const page = await pageFromFile(file, context);
+  page.slug = page.slug || (page.matterfront as any)?.slug;
 
   if (page.slug) {
     try {
@@ -44,8 +52,6 @@ async function processMatterfront(file: string, context: GlobalContext) {
   } else {
     console.warn(`! Missing slug in file ${page.relativePath}`);
   }
-
-  return page;
 }
 
 async function main() {
@@ -110,19 +116,12 @@ async function main() {
     resolve(srcDir, context.configuration.layoutsFolder),
     false
   )) {
-    const content = (await readFile(file)).toString();
-    const r = matter(content);
-    const matterfront: Page = {
-      publicUrl: "<TEMPLATE>",
-      ...r,
-      orig: content,
-      relativePath: relative(context.srcDir, file),
-    };
+    const page = await pageFromFile(file, context)
     const name = basename(file).replace(/\..+$/, "");
     console.log(`> Loading template ${name} from ${relative(srcDir, file)}`);
     context.layouts[name] = {
-      matter: matterfront,
-      template: Handlebars.compile(matterfront.content),
+      matter: page,
+      template: Handlebars.compile(page.content),
     };
     Handlebars.registerPartial(name, function (ctx) {
       return renderWithLayout(context, name, ctx, ["(partial)"]);
@@ -161,12 +160,12 @@ async function main() {
 
   for (const page of Object.values(context.pages)) {
     if (
-      page.data.redirect_from &&
-      Array.isArray(page.data.redirect_from) &&
+      page.matterfront.redirect_from &&
+      Array.isArray(page.matterfront.redirect_from) &&
       page.slug
     ) {
       const content = Buffer.from(redirectPage(context, page.slug as string));
-      for (const path of page.data.redirect_from) {
+      for (const path of page.matterfront.redirect_from) {
         const normalizedPath = path.replace(/\/$/, "");
         context.outFiles[normalizedPath + ".html"] = content;
         context.outFiles[normalizedPath + "/index.html"] = content;

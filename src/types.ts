@@ -7,7 +7,7 @@ export type Page = {
   orig: string;
   language: string;
   matter: string;
-  data: Record<any, unknown>
+  matterfront: Record<any, unknown>
   relativePath: string
   slug?: string
 };
