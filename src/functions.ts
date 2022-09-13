@@ -1,6 +1,7 @@
 import Handlebars from "handlebars";
 import { parse as parseMarkdown, ParseFlags } from "markdown-wasm";
 import hljs from "highlight.js";
+import get from "lodash.get";
 import { graphvizSync } from "@hpcc-js/wasm";
 
 export async function init() {
@@ -27,6 +28,11 @@ export async function init() {
     const j = JSON.stringify(arg, null, 2);
     console.log(j);
     return j;
+  });
+
+  Handlebars.registerHelper("log", function (arg) {
+    console.dir(arg);
+    return undefined;
   });
 
   Handlebars.registerHelper("eq", function (a, b) {
@@ -126,7 +132,7 @@ export async function init() {
         : [];
 
       return iter.sort((a, b) => {
-        return a[field] < b[field] ? -1 : 1;
+        return get(a, field) < get(b, field) ? -1 : 1;
       });
     }
     throw new Error("Iteration failed. second argument field not");
@@ -141,9 +147,13 @@ export async function init() {
         : [];
 
       return iter.sort((a, b) => {
-        return a[field] > b[field] ? -1 : 1;
+        return get(a, field) > get(b, field) ? -1 : 1;
       });
     }
     throw new Error("Iteration failed. second argument field not");
+  });
+
+  Handlebars.registerHelper("get", function (obj, field) {
+    return get(obj, field)
   });
 }

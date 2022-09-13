@@ -6,11 +6,11 @@ slug: /
 
 <section class="post-list">
   <div class="{{ context.AAA }}"></div>
-  {{#each (sortDesc context.pages "date") as |post| }} {{#if post.date }}
-  <a href="{{ post.slug }}" class="post-item" title="{{ post.title }}">
+  {{#each (sortDesc context.pages "data.desc") as |post| }} {{#if post.data.date }}
+  <a href="{{ post.slug }}" class="post-item" title="{{ post.data.title }}">
     <div class="article-title">
-      <span>{{ post.title }}</span>
-      <time datetime="{{ isoDate post.date }}">{{ prettyDate post.date }}</time>
+      <span>{{ post.data.title }}</span>
+      <time datetime="{{ isoDate post.data.date }}">{{ prettyDate post.data.date }}</time>
     </div>
 
     {{{ markdown post.excerpt }}}

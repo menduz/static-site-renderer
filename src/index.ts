@@ -5,185 +5,47 @@ import matter from "gray-matter";
 import { basename, dirname, join, relative, resolve } from "path";
 import { iterateFolder } from "./filesystem.js";
 import Handlebars from "handlebars";
-import b from "js-beautify";
-import sass from "sass";
+
 import hljs from "highlight.js";
 
 import { init as initHandlebars } from "./functions.js";
 import { existsSync } from "fs";
-
-type Page = {
-  publicUrl: string;
-  content: string;
-  excerpt?: string;
-  orig: string;
-  language: string;
-  matter: string;
-} & Record<any, unknown>;
-
-type GlobalContext = {
-  baseUrl: string;
-  srcDir: string;
-  pages: Record<string, Page>;
-  layouts: Record<
-    string,
-    {
-      matter: Page;
-      template: Handlebars.TemplateDelegate;
-    }
-  >;
-  configuration: {
-    staticFolder: string;
-    layoutsFolder: string;
-  };
-  styles: Record<string, Page & { finalUrl: string }>;
-  preProcessPage?: (page: Page) => void;
-};
-
-Handlebars.registerHelper("styleUrl", function (context: GlobalContext, name) {
-  if (!context.styles[name]) throw new Error("Style not found: " + name);
-  return context.styles[name].finalUrl;
-});
+import { GlobalContext, Page } from "./types.js";
+import { scssPlugin } from "./plugin-scss.js";
+import { htmlPlugin, renderWithLayout } from "./plugin-html.js";
 
 // Process a matterfront file
-async function processMatterfront(file: string, globalContext: GlobalContext) {
+async function processMatterfront(file: string, context: GlobalContext) {
   const content = (await readFile(file)).toString();
   const r = matter(content);
-  const matterfront: Page = {
-    ...r.data,
+  const page: Page = {
     ...r,
     orig: content,
     publicUrl: "NONE",
-    relativePath: relative(globalContext.srcDir, file),
+    relativePath: relative(context.srcDir, file),
   };
 
-  if (file.endsWith(".css") || file.endsWith(".scss")) {
-    matterfront.content = (
-      await sass.compileStringAsync(matterfront.content, {
-        loadPaths: [dirname(file)],
-      })
-    ).css;
+  if (context.preProcessPage) {
+    context.preProcessPage(page);
   }
 
-  if (globalContext.preProcessPage) {
-    globalContext.preProcessPage(matterfront);
-  }
+  page.slug = page.slug || (page.data as any)?.slug;
 
-  const slug = matterfront.slug as string | undefined;
-
-  if (slug) {
+  if (page.slug) {
     try {
-      matterfront.publicUrl = new URL(slug, globalContext.baseUrl).toString();
+      page.publicUrl = new URL(page.slug, context.baseUrl).toString();
     } catch (err: any) {
-      matterfront.publicUrl = globalContext.baseUrl + slug;
+      page.publicUrl = context.baseUrl + page.slug;
     }
-
-    if ((slug as string) in globalContext.pages) {
-      throw new Error("Duplicated slug: " + slug);
+    if (page.slug in context.pages) {
+      throw new Error("Duplicated slug: " + page.slug);
     }
-
-    if (file.endsWith(".css") || file.endsWith(".scss")) {
-      globalContext.styles[slug] = {
-        ...matterfront,
-        finalUrl: slug,
-      };
-    } else {
-      globalContext.pages[slug] = matterfront;
-    }
+    context.pages[page.slug] = page;
   } else {
-    console.warn(
-      `! Missing slug in file ${relative(globalContext.srcDir, file)}`
-    );
+    console.warn(`! Missing slug in file ${page.relativePath}`);
   }
-}
 
-// Render a page to disk
-async function renderPage(context: GlobalContext, ret: Page, outDir: string) {
-  const paths: Set<string> = new Set();
-
-  function addOutPath(path: string) {
-    // add slug with and without /index.html
-    const normalizedPath = path.replace(/\/$/, "");
-    paths.add(join(outDir, normalizedPath + ".html"));
-    paths.add(join(outDir, normalizedPath + "/index.html"));
-  }
-  const slug = ret.slug as string;
-
-  if (slug) {
-    if (Array.isArray(ret.redirect_from)) {
-      for (const path of ret.redirect_from as string[]) {
-        // await writeFile(outPath, content);
-      }
-    }
-
-    console.log(`> Rendering ${slug as any}`);
-
-    addOutPath(slug);
-
-    if (!ret.raw) {
-      ret.content = Handlebars.compile(ret.content)({ context, ...ret });
-    }
-
-    const content = b.html(
-      renderWithLayout(context, ret.layout as string | undefined, ret, [slug]),
-      {
-        indent_size: 2,
-      }
-    );
-
-    for (const outPath of paths) {
-      await mkdir(dirname(outPath), { recursive: true });
-      await writeFile(outPath, content);
-      console.log(`  Writing ${relative(context.srcDir, outPath)}`);
-    }
-  }
-}
-
-// Render all pages to disk
-async function renderAll(context: GlobalContext, outDir: string) {
-  for (let i in context.pages) {
-    await renderPage(context, context.pages[i], outDir);
-    console.log();
-  }
-}
-
-// renders a page using a layout
-function renderWithLayout(
-  context: GlobalContext,
-  layoutName: string | undefined,
-  data: any,
-  stack: string[]
-): string {
-  const contextForRendering = { context, ...data };
-
-  if (layoutName) {
-    const layout = context.layouts[layoutName];
-
-    if (!layout) throw new Error("Inexistent layout: " + layoutName);
-
-    const content = layout.template(contextForRendering);
-
-    const newStack = [...stack, layoutName];
-    if (layout.matter.layout) {
-      return renderWithLayout(
-        context,
-        layout.matter.layout as string | undefined,
-        {
-          content,
-          data,
-          context,
-        },
-        newStack
-      );
-    }
-
-    // console.log(`    ${newStack.join(" < ")}`);
-
-    return content;
-  } else {
-    console.dir(data);
-    throw new Error("asd");
-  }
+  return page;
 }
 
 async function main() {
@@ -223,6 +85,8 @@ async function main() {
       staticFolder: ".site-generator/public",
       layoutsFolder: ".site-generator/layouts",
     },
+    plugins: [scssPlugin, htmlPlugin],
+    outFiles: {},
   };
 
   (context as any).context = context;
@@ -250,7 +114,6 @@ async function main() {
     const r = matter(content);
     const matterfront: Page = {
       publicUrl: "<TEMPLATE>",
-      ...r.data,
       ...r,
       orig: content,
       relativePath: relative(context.srcDir, file),
@@ -280,6 +143,12 @@ async function main() {
     await imported.runChecks(paramsForScript);
   }
 
+  for (const plugin of context.plugins) {
+    for (const page of Object.values(context.pages)) {
+      await plugin(context, page);
+    }
+  }
+
   // copy public folder
   const publicFolder = resolve(
     resolve(srcDir, context.configuration.staticFolder)
@@ -290,38 +159,35 @@ async function main() {
     await cp(file, resolve(outDir, relativePath));
   }
 
-  // copy public folder
-  for (let styleSlug in context.styles) {
-    const outPath = resolve(outDir, styleSlug);
-    context.styles[styleSlug].finalUrl = "/" + styleSlug;
-    console.log(`> Writing ${outPath}`);
-    await writeFile(outPath, context.styles[styleSlug].content);
-  }
-
-  console.log(`Redirects:`);
   for (const page of Object.values(context.pages)) {
-    if (page.redirect_from && Array.isArray(page.redirect_from) && page.slug) {
-      const content = redirectPage(context, page.slug as string);
-      for (const path of page.redirect_from) {
+    if (
+      page.data.redirect_from &&
+      Array.isArray(page.data.redirect_from) &&
+      page.slug
+    ) {
+      const content = Buffer.from(redirectPage(context, page.slug as string));
+      for (const path of page.data.redirect_from) {
         const normalizedPath = path.replace(/\/$/, "");
-        {
-          const dst = join(outDir, normalizedPath + ".html");
-          await mkdir(dirname(dst), { recursive: true });
-          console.log(`> Writing ${dst}`);
-          await writeFile(dst, content);
-        }
-        {
-          const dst = join(outDir, normalizedPath + "/index.html");
-          await mkdir(dirname(dst), { recursive: true });
-          console.log(`> Writing ${dst}`);
-          await writeFile(dst, content);
-        }
+        context.outFiles[normalizedPath + ".html"] = content;
+        context.outFiles[normalizedPath + "/index.html"] = content;
       }
     }
   }
 
-  // render everything
-  await renderAll(context, outDir);
+  // write files
+  for (const [file, buffer] of Object.entries(context.outFiles)) {
+    let resolvedFile = file.startsWith("/")
+      ? outDir + file
+      : resolve(outDir, file);
+
+    if (!resolvedFile.startsWith(outDir)) {
+      console.log("! Ignoring writing out file " + resolvedFile);
+      continue;
+    }
+    await mkdir(dirname(resolvedFile), { recursive: true });
+    await writeFile(resolvedFile, buffer);
+    console.log(`  Writing ${relative(outDir, resolvedFile)}`);
+  }
 }
 
 function redirectPage(context: GlobalContext, slug: string) {
