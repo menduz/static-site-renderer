@@ -50,6 +50,7 @@ async function processMatterfront(file: string, globalContext: GlobalContext) {
     ...r,
     orig: content,
     publicUrl: "NONE",
+    relativePath: relative(globalContext.srcDir, file)
   };
 
   if (file.endsWith(".css") || file.endsWith(".scss")) {
@@ -244,6 +245,7 @@ async function main() {
       ...r.data,
       ...r,
       orig: content,
+      relativePath: relative(context.srcDir, file)
     };
     const name = basename(file).replace(/\..+$/, "");
     console.log(`> Loading template ${name} from ${relative(srcDir, file)}`);
