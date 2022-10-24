@@ -8,7 +8,8 @@ export async function init() {
   const viz = await graphvizSync();
 
   Handlebars.registerHelper("markdown", (content: string) => {
-    return parseMarkdown(content, {
+    if (typeof content !== "string" || !content.trim().length) return "";
+    return parseMarkdown(content ?? "", {
       onCodeBlock(lang, codeBytes) {
         const code = codeBytes.toString();
         if (lang == "x-dot") {
@@ -154,6 +155,6 @@ export async function init() {
   });
 
   Handlebars.registerHelper("get", function (obj, field) {
-    return get(obj, field)
+    return get(obj, field);
   });
 }
