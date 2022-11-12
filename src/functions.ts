@@ -18,10 +18,10 @@ export async function init(context: GlobalContext) {
         if (lang == "x-dot") {
           return viz.dot(code, "svg");
         }
-        const language = hljs.getLanguage(lang) ? lang : "plaintext";
         try {
-          const [prettyCode, lang] = formatIfNeeded(code, language);
-          return hljs.highlight(prettyCode, { language: lang }).value;
+          const [prettyCode, newLang] = formatIfNeeded(code, lang);
+          const language = hljs.getLanguage(newLang) ? newLang : "plaintext";
+          return hljs.highlight(prettyCode, { language }).value;
         } catch (err) {
           context.errors.push(
             new Error(`⚠️  Error in ${that.relativePath}:\n${err.message}`)
@@ -189,20 +189,30 @@ function formatIfNeeded(code: string, language: string): [string, string] {
         language,
       ];
     case "json":
-    case "jsonc":
-    case "json5":
       return [
         prettier.format(code, {
           semi: false,
-          parser: "jsonc",
+          parser: "json",
           printWidth: 100,
           trailingComma: "none",
         }),
         "json",
       ];
+    case "jsonc":
+      return [
+        prettier.format(code, {
+          semi: false,
+          parser: "json",
+          printWidth: 100,
+          trailingComma: "none",
+        }),
+        "javascript",
+      ];
     case "javascript":
     case "js":
+    case "jsx":
     case "ts":
+    case "tsx":
       return [
         prettier.format(code, {
           semi: false,
