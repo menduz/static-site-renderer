@@ -4,11 +4,13 @@ import hljs from "highlight.js";
 import get from "lodash.get";
 import prettier from "prettier";
 import { graphvizSync } from "@hpcc-js/wasm";
+import { GlobalContext } from "./types";
 
-export async function init() {
+export async function init(context: GlobalContext) {
   const viz = await graphvizSync();
 
-  Handlebars.registerHelper("markdown", (content: string) => {
+  Handlebars.registerHelper("markdown", function (content: string) {
+    const that = this;
     if (typeof content !== "string" || !content.trim().length) return "";
     return parseMarkdown(content ?? "", {
       onCodeBlock(lang, codeBytes) {
@@ -17,9 +19,15 @@ export async function init() {
           return viz.dot(code, "svg");
         }
         const language = hljs.getLanguage(lang) ? lang : "plaintext";
-
-        return hljs.highlight(formatIfNeeded(code, language), { language })
-          .value;
+        try {
+          const [prettyCode, lang] = formatIfNeeded(code, language);
+          return hljs.highlight(prettyCode, { language: lang }).value;
+        } catch (err) {
+          context.errors.push(
+            new Error(`⚠️  Error in ${that.relativePath}:\n${err.message}`)
+          );
+          return code;
+        }
       },
       parseFlags:
         ParseFlags.DEFAULT |
@@ -99,8 +107,7 @@ export async function init() {
     try {
       return new URL(part, base).toString();
     } catch (err) {
-      console.dir({ part, base });
-      throw err;
+      return base + part;
     }
   });
 
@@ -162,24 +169,49 @@ export async function init() {
   });
 }
 
-function formatIfNeeded(code: string, language: string) {
-  try {
-    switch (language) {
-      case "typescript":
-      case "css":
-      case "scss":
-      case "json":
-      case "yaml":
-      case "json5":
-      case "graphql":
-      case "markdown":
-      case "html":
-        return prettier.format(code, { semi: false, parser: language });
-      case "javascript":
-        return prettier.format(code, { semi: false, parser: "babel" });
-    }
-    return code;
-  } catch {
-    return code;
+function formatIfNeeded(code: string, language: string): [string, string] {
+  switch (language) {
+    case "typescript":
+    case "css":
+    case "scss":
+    case "json":
+    case "yaml":
+    case "graphql":
+    case "markdown":
+    case "html":
+      return [
+        prettier.format(code, {
+          semi: false,
+          parser: language,
+          printWidth: 100,
+          trailingComma: "none",
+        }),
+        language,
+      ];
+    case "json":
+    case "jsonc":
+    case "json5":
+      return [
+        prettier.format(code, {
+          semi: false,
+          parser: "jsonc",
+          printWidth: 100,
+          trailingComma: "none",
+        }),
+        "json",
+      ];
+    case "javascript":
+    case "js":
+    case "ts":
+      return [
+        prettier.format(code, {
+          semi: false,
+          parser: "typescript",
+          printWidth: 100,
+          trailingComma: "none",
+        }),
+        "typescript",
+      ];
   }
+  return [code, language];
 }

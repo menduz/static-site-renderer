@@ -31,6 +31,7 @@ export type GlobalContext = {
   preProcessPage?: (page: Page) => void;
   plugins: Array<SitePlugin>
   outFiles: Record<string, Buffer>
+  errors: Error[]
 };
 
 export type SitePlugin = (context: GlobalContext, page: Page) => Promise<void>

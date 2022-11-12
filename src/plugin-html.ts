@@ -1,5 +1,5 @@
 import { GlobalContext, Page, SitePlugin } from "./types";
-import b from "js-beautify";
+import prettier from "prettier";
 import * as Handlebars from "handlebars";
 
 export const htmlPlugin: SitePlugin = async (context, page) => {
@@ -33,14 +33,21 @@ async function renderPage(context: GlobalContext, ret: Page) {
       ret.content = Handlebars.compile(ret.content)({ context, ...ret });
     }
 
-    const content = b.html(
-      renderWithLayout(context, ret.matterfront.layout as string | undefined, ret, [
-        ret.slug,
-      ]),
-      {
-        indent_size: 2,
-      }
+    let content = renderWithLayout(
+      context,
+      ret.matterfront.layout as string | undefined,
+      ret,
+      [ret.slug]
     );
+    try {
+      content = prettier.format(content, {
+        semi: false,
+        parser: "html",
+        printWidth: 100,
+      });
+    } catch (err: any) {
+      context.errors.push(err);
+    }
 
     for (const outPath of paths) {
       context.outFiles[outPath] = Buffer.from(content);
@@ -76,7 +83,6 @@ export function renderWithLayout(
 
     return content;
   } else {
-    console.dir(page);
-    throw new Error("asd");
+    throw new Error(`Invalid layout name ${layoutName}`);
   }
 }

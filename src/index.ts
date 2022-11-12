@@ -65,7 +65,7 @@ async function main() {
   if (!args["--outDir"]) throw new Error("--outDir must be provided");
   if (!args["--publicUrl"]) throw new Error("--publicUrl must be provided");
 
-  await initHandlebars();
+
 
   const srcDir = resolve(args["--srcDir"]!);
   const outDir = resolve(args["--outDir"]!);
@@ -93,7 +93,10 @@ async function main() {
     },
     plugins: [scssPlugin, htmlPlugin],
     outFiles: {},
+    errors: []
   };
+
+  await initHandlebars(context);
 
   (context as any).context = context;
 
@@ -187,6 +190,11 @@ async function main() {
     await writeFile(resolvedFile, buffer);
     console.log(`  Writing ${relative(outDir, resolvedFile)}`);
   }
+
+  context.errors.forEach(err => {
+    console.log(err.message || err)
+    process.exitCode = 1
+  })
 }
 
 function redirectPage(context: GlobalContext, slug: string) {
