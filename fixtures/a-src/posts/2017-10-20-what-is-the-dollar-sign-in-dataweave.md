@@ -47,3 +47,4 @@ map([1,2], (item, index) -> (item * 10 + index))
 
 [1,2] map ($ * 10 + $$)
 ```
+

@@ -302,6 +302,25 @@ pi(<span class="hljs-number">1E4</span>)
 </g>
 </svg>
 </code></pre>
+      <p>Unformated typescript</p>
+      <pre><code class="language-typescript"><span class="hljs-keyword">function</span> <span class="hljs-title function_">formatIfNeeded</span>(<span class="hljs-params">code: <span class="hljs-built_in">string</span>, language: <span class="hljs-built_in">string</span></span>) {
+  <span class="hljs-keyword">switch</span> (language) {
+    <span class="hljs-keyword">case</span> <span class="hljs-string">&quot;typescript&quot;</span>:
+    <span class="hljs-keyword">case</span> <span class="hljs-string">&quot;css&quot;</span>:
+    <span class="hljs-keyword">case</span> <span class="hljs-string">&quot;scss&quot;</span>:
+    <span class="hljs-keyword">case</span> <span class="hljs-string">&quot;json&quot;</span>:
+    <span class="hljs-keyword">case</span> <span class="hljs-string">&quot;yaml&quot;</span>:
+    <span class="hljs-keyword">case</span> <span class="hljs-string">&quot;json5&quot;</span>:
+    <span class="hljs-keyword">case</span> <span class="hljs-string">&quot;graphql&quot;</span>:
+    <span class="hljs-keyword">case</span> <span class="hljs-string">&quot;markdown&quot;</span>:
+    <span class="hljs-keyword">case</span> <span class="hljs-string">&quot;html&quot;</span>:
+      <span class="hljs-keyword">return</span> prettier.<span class="hljs-title function_">format</span>(code, { <span class="hljs-attr">semi</span>: <span class="hljs-literal">false</span>, <span class="hljs-attr">parser</span>: language })
+    <span class="hljs-keyword">case</span> <span class="hljs-string">&quot;javascript&quot;</span>:
+      <span class="hljs-keyword">return</span> prettier.<span class="hljs-title function_">format</span>(code, { <span class="hljs-attr">semi</span>: <span class="hljs-literal">false</span>, <span class="hljs-attr">parser</span>: <span class="hljs-string">&quot;babel&quot;</span> })
+  }
+  <span class="hljs-keyword">return</span> code
+}
+</code></pre>
 
       <footer>
         By

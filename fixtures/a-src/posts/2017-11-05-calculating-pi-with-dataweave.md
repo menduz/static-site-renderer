@@ -91,3 +91,25 @@ digraph G {
 	end [shape=Msquare];
 }
 ```
+
+
+Unformated typescript
+```typescript
+function formatIfNeeded(code: string, language: string) {
+switch (language) {
+case "typescript":
+case "css":
+case "scss":
+case "json":
+case "yaml":
+case "json5":
+case "graphql":
+case "markdown":
+case "html":
+return prettier.format(code, { semi: false, parser: language });
+case "javascript":
+return prettier.format(code, { semi: false, parser: "babel" });
+}
+return code;
+}
+```

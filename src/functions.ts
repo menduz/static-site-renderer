@@ -2,6 +2,7 @@ import Handlebars from "handlebars";
 import { parse as parseMarkdown, ParseFlags } from "markdown-wasm";
 import hljs from "highlight.js";
 import get from "lodash.get";
+import prettier from "prettier";
 import { graphvizSync } from "@hpcc-js/wasm";
 
 export async function init() {
@@ -16,7 +17,9 @@ export async function init() {
           return viz.dot(code, "svg");
         }
         const language = hljs.getLanguage(lang) ? lang : "plaintext";
-        return hljs.highlight(code, { language }).value;
+
+        return hljs.highlight(formatIfNeeded(code, language), { language })
+          .value;
       },
       parseFlags:
         ParseFlags.DEFAULT |
@@ -157,4 +160,26 @@ export async function init() {
   Handlebars.registerHelper("get", function (obj, field) {
     return get(obj, field);
   });
+}
+
+function formatIfNeeded(code: string, language: string) {
+  try {
+    switch (language) {
+      case "typescript":
+      case "css":
+      case "scss":
+      case "json":
+      case "yaml":
+      case "json5":
+      case "graphql":
+      case "markdown":
+      case "html":
+        return prettier.format(code, { semi: false, parser: language });
+      case "javascript":
+        return prettier.format(code, { semi: false, parser: "babel" });
+    }
+    return code;
+  } catch {
+    return code;
+  }
 }

@@ -24,6 +24,7 @@
     "js-beautify": "^1.14.6",
     "lodash.get": "^4.4.2",
     "markdown-wasm": "^1.2.0",
+    "prettier": "^2.7.1",
     "sass": "^1.54.5"
   },
   "devDependencies": {
