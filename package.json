@@ -16,7 +16,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@hpcc-js/wasm": "^1.15.4",
+    "@hpcc-js/wasm": "^2.4.0",
     "arg": "^5.0.2",
     "gray-matter": "^4.0.3",
     "handlebars": "^4.7.7",
